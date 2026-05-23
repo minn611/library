@@ -1,9 +1,5 @@
 # 📚 THƯ VIỆN CỦA HIẾU
 ## *"Nơi tri thức ngự trị"*
-
-> **Công nghệ:** ASP.NET Core MVC · Entity Framework Core · SQL Server · Bootstrap 5  
-> **IDE:** Visual Studio Code · .NET 8
-
 ---
 
 ## 1. Tầm Nhìn & Bản Sắc Thương Hiệu
