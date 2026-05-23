@@ -1,0 +1,138 @@
+@model ThuvienCuaHieu.Models.Book
+@{
+    ViewData["Title"] = "Chỉnh Sửa Sách";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Cột Trái: Sidebar Menu -->
+        <div class="col-lg-3">
+            <partial name="_AdminSidebar" />
+        </div>
+
+        <!-- Cột Phải: Form Chỉnh Sửa Sách -->
+        <div class="col-lg-9">
+            <!-- Header Panel -->
+            <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-teal-dk mb-1" style="font-family: 'Playfair Display', serif;">Chỉnh Sửa Thông Tin Sách</h2>
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">Cập nhật lại các thông số hoặc mô tả của đầu sách.</p>
+                </div>
+                <a asp-action="Books" class="btn btn-sm btn-outline-teal d-flex align-items-center gap-1" style="border-radius: 20px;">
+                    <i class="fa-solid fa-arrow-left"></i> Trở Lại
+                </a>
+            </div>
+
+            <!-- Form Card -->
+            <div class="bg-white border border-secondary border-opacity-10 rounded-4 shadow-sm p-4">
+                
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger rounded-3 border-0 p-3 mb-4 text-start" style="font-size: 0.9rem;" role="alert">
+                        <i class="fa-solid fa-circle-xmark me-2"></i> <strong>Vui lòng kiểm tra lại thông tin:</strong>
+                        <div asp-validation-summary="All" class="mt-2 text-danger"></div>
+                    </div>
+                }
+
+                <form asp-action="EditBook" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="BookId" />
+
+                    <div class="row g-3">
+                        <!-- Tên Sách -->
+                        <div class="col-md-6">
+                            <label asp-for="Title" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Tên Đầu Sách <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control form-control-custom" placeholder="Nhà Giả Kim" required />
+                            <span asp-validation-for="Title" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Tác Giả -->
+                        <div class="col-md-6">
+                            <label asp-for="Author" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Tác Giả <span class="text-danger">*</span></label>
+                            <input asp-for="Author" class="form-control form-control-custom" placeholder="Paulo Coelho" required />
+                            <span asp-validation-for="Author" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Thể Loại -->
+                        <div class="col-md-6">
+                            <label asp-for="CategoryId" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Thể Loại Sách <span class="text-danger">*</span></label>
+                            <select asp-for="CategoryId" class="form-select form-control-custom" asp-items="ViewBag.Categories" required>
+                                <option value="">Chọn thể loại...</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Mã ISBN -->
+                        <div class="col-md-6">
+                            <label asp-for="ISBN" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Mã ISBN Sách</label>
+                            <input asp-for="ISBN" class="form-control form-control-custom" placeholder="9780062315007" />
+                            <span asp-validation-for="ISBN" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Nhà Xuất Bản -->
+                        <div class="col-md-6">
+                            <label asp-for="Publisher" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Nhà Xuất Bản</label>
+                            <input asp-for="Publisher" class="form-control form-control-custom" placeholder="NXB Văn Học" />
+                            <span asp-validation-for="Publisher" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Năm Xuất Bản -->
+                        <div class="col-md-3">
+                            <label asp-for="PublishedYear" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Năm Xuất Bản</label>
+                            <input asp-for="PublishedYear" type="number" class="form-control form-control-custom" />
+                            <span asp-validation-for="PublishedYear" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Tổng Số Lượng -->
+                        <div class="col-md-3">
+                            <label asp-for="TotalQty" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Tổng Số Lượng <span class="text-danger">*</span></label>
+                            <input asp-for="TotalQty" type="number" class="form-control form-control-custom" min="0" required />
+                            <span asp-validation-for="TotalQty" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Link Tham Khảo (SourceUrl) -->
+                        <div class="col-md-6">
+                            <label asp-for="SourceUrl" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Link Tham Khảo (dilib.vn)</label>
+                            <input asp-for="SourceUrl" class="form-control form-control-custom" placeholder="https://dilib.vn/sach-mau..." />
+                            <span asp-validation-for="SourceUrl" class="text-danger fs-7"></span>
+                        </div>
+
+                        <!-- Hiện ảnh bìa cũ & Tải ảnh bìa mới -->
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-3">
+                                @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+                                {
+                                    <div class="text-center">
+                                        <span class="d-block text-muted fs-8 mb-1" style="font-size: 0.75rem;">Bìa Hiện Tại</span>
+                                        <img src="@Model.CoverImageUrl" alt="Cover" class="rounded shadow border" style="width: 50px; height: 75px; object-fit: cover;" onerror="this.src='https://covers.openlibrary.org/b/id/10527843-M.jpg'" />
+                                    </div>
+                                }
+                                <div class="flex-grow-1">
+                                    <label class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Thay Đổi Ảnh Bìa (Upload File hoặc nhập Link mới)</label>
+                                    <input type="file" name="coverFile" id="coverFile" class="form-control form-control-custom mb-2" accept="image/*" />
+                                    <input asp-for="CoverImageUrl" class="form-control form-control-custom" placeholder="Dán URL ảnh bìa: https://..." />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mô Tả Tóm Tắt -->
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Tóm Tắt Nội Dung Sách</label>
+                            <textarea asp-for="Description" rows="4" class="form-control" style="border-radius: 12px; border-color: var(--c-blue-lt);" placeholder="Mô tả tóm tắt nội dung cuốn sách..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger fs-7"></span>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
+                        <a asp-action="Books" class="btn btn-outline-secondary" style="border-radius: 20px;">Hủy Bỏ</a>
+                        <button type="submit" class="btn btn-teal">
+                            <i class="fa-solid fa-save me-1"></i> Lưu Cập Nhật
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,228 @@
+@model ThuvienCuaHieu.ViewModels.BookSearchVM
+@{
+    ViewData["Title"] = "Thư Viện Sách";
+}
+
+<div class="container py-5">
+    <!-- Header banner -->
+    <div class="p-4 p-md-5 mb-5 rounded-4 shadow-sm text-white text-center" style="background: linear-gradient(135deg, var(--c-teal-dk) 0%, var(--c-teal) 100%); border-bottom: 3px solid var(--c-peach);">
+        <h1 class="display-4 fw-bold" style="font-family: 'Playfair Display', serif;">Khám Phá Kho Tri Thức</h1>
+        <p class="fs-5 text-mint mb-0">Hàng trăm đầu sách thuộc mọi lĩnh vực đang chờ đón bạn.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Filter (Cột Trái) -->
+        <div class="col-lg-3">
+            <div class="filter-sidebar">
+                <div class="filter-title">
+                    <i class="fa-solid fa-filter text-peach"></i>
+                    <span>Bộ Lọc Sách</span>
+                </div>
+
+                <!-- Form Filter -->
+                <form id="filterForm" asp-action="Index" method="get">
+                    <!-- Keep Search query intact -->
+                    <input type="hidden" name="searchQuery" value="@Model.SearchQuery" />
+                    <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+
+                    <!-- Filter by Category -->
+                    <div class="filter-group">
+                        <h5>Thể Loại</h5>
+                        <ul class="filter-link-list">
+                            <li>
+                                <a href="@Url.Action("Index", new { searchQuery = Model.SearchQuery, sortOrder = Model.SortOrder, status = Model.SelectedStatus, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear })" 
+                                   class="@(Model.SelectedCategoryId == null ? "active" : "")">
+                                    <span>Tất cả thể loại</span>
+                                </a>
+                            </li>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <li>
+                                    <a href="@Url.Action("Index", new { categoryId = cat.CategoryId, searchQuery = Model.SearchQuery, sortOrder = Model.SortOrder, status = Model.SelectedStatus, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear })" 
+                                       class="@(Model.SelectedCategoryId == cat.CategoryId ? "active" : "")">
+                                        <span>@cat.Name</span>
+                                        <span class="badge bg-secondary rounded-pill bg-opacity-25 text-dark" style="font-size: 0.75rem;">@cat.Books.Count</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                        @if (Model.SelectedCategoryId.HasValue)
+                        {
+                            <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+                        }
+                    </div>
+
+                    <!-- Filter by Status -->
+                    <div class="filter-group border-top pt-3">
+                        <h5>Trạng Thái</h5>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="status" id="statusAll" value="All" @(string.IsNullOrEmpty(Model.SelectedStatus) || Model.SelectedStatus == "All" ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label text-muted fs-7" for="statusAll">Tất cả</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="status" id="statusAvail" value="Available" @(Model.SelectedStatus == "Available" ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label text-muted fs-7" for="statusAvail">Còn sách trong kho</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="status" id="statusOut" value="OutOfStock" @(Model.SelectedStatus == "OutOfStock" ? "checked" : "") onchange="this.form.submit()">
+                            <label class="form-check-label text-muted fs-7" for="statusOut">Đã hết sách</label>
+                        </div>
+                    </div>
+
+                    <!-- Filter by Author -->
+                    <div class="filter-group border-top pt-3">
+                        <h5>Tác Giả</h5>
+                        <select name="author" class="form-select form-select-sm border-secondary border-opacity-25" style="border-radius: 8px;" onchange="this.form.submit()">
+                            <option value="">Chọn tác giả...</option>
+                            @foreach (var auth in Model.Authors)
+                            {
+                                <!option value="@auth" @(Model.SelectedAuthor == auth ? "selected" : "")>@auth</!option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Filter by Publish Year -->
+                    <div class="filter-group border-top pt-3">
+                        <h5>Năm Xuất Bản</h5>
+                        <select name="publishYear" class="form-select form-select-sm border-secondary border-opacity-25" style="border-radius: 8px;" onchange="this.form.submit()">
+                            <option value="">Chọn năm...</option>
+                            @foreach (var yr in Model.PublishYears)
+                            {
+                                <!option value="@yr" @(Model.SelectedPublishYear == yr ? "selected" : "")>@yr</!option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <a asp-action="Index" class="btn btn-sm btn-outline-teal text-center" style="border-radius: 20px;">
+                            <i class="fa-solid fa-rotate-left me-1"></i> Xóa Bộ Lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Books Grid (Cột Phải) -->
+        <div class="col-lg-9">
+            <!-- Search & Sort Bar -->
+            <div class="bg-white border border-secondary border-opacity-25 p-3 rounded-4 shadow-sm mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                <div class="text-muted" style="font-size: 0.9rem;">
+                    Tìm thấy <span class="text-teal-dk fw-bold">@Model.TotalItems</span> cuốn sách
+                </div>
+
+                <!-- Live search on page & Sort -->
+                <div class="d-flex align-items-center gap-2 w-100 w-sm-auto justify-content-end">
+                    <form asp-action="Index" method="get" class="d-flex align-items-center gap-2 flex-grow-1 flex-sm-grow-0">
+                        <!-- Keep other filter values -->
+                        @if (Model.SelectedCategoryId.HasValue) { <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" /> }
+                        @if (!string.IsNullOrEmpty(Model.SelectedAuthor)) { <input type="hidden" name="author" value="@Model.SelectedAuthor" /> }
+                        @if (Model.SelectedPublishYear.HasValue) { <input type="hidden" name="publishYear" value="@Model.SelectedPublishYear" /> }
+                        @if (!string.IsNullOrEmpty(Model.SelectedStatus)) { <input type="hidden" name="status" value="@Model.SelectedStatus" /> }
+                        <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="searchQuery" class="form-control" style="border-top-left-radius: 20px; border-bottom-left-radius: 20px;" placeholder="Tìm tên sách..." value="@Model.SearchQuery" />
+                            <button type="submit" class="btn btn-teal btn-sm" style="border-top-right-radius: 20px; border-bottom-right-radius: 20px;">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Sorting -->
+                    <select class="form-select form-select-sm border-secondary border-opacity-25" style="width: auto; border-radius: 20px;" onchange="location = this.value;">
+                        <!option value="@Url.Action("Index", new { sortOrder = "newest", searchQuery = Model.SearchQuery, categoryId = Model.SelectedCategoryId, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear, status = Model.SelectedStatus })" @(Model.SortOrder == "newest" ? "selected" : "")>Mới nhất</!option>
+                        <!option value="@Url.Action("Index", new { sortOrder = "popular", searchQuery = Model.SearchQuery, categoryId = Model.SelectedCategoryId, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear, status = Model.SelectedStatus })" @(Model.SortOrder == "popular" ? "selected" : "")>Phổ biến nhất</!option>
+                        <!option value="@Url.Action("Index", new { sortOrder = "az", searchQuery = Model.SearchQuery, categoryId = Model.SelectedCategoryId, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear, status = Model.SelectedStatus })" @(Model.SortOrder == "az" ? "selected" : "")>Tên sách (A-Z)</!option>
+                        <!option value="@Url.Action("Index", new { sortOrder = "za", searchQuery = Model.SearchQuery, categoryId = Model.SelectedCategoryId, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear, status = Model.SelectedStatus })" @(Model.SortOrder == "za" ? "selected" : "")>Tên sách (Z-A)</!option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Library Books Grid -->
+            @if (Model.Books.Any())
+            {
+                <div class="row g-4 mb-5">
+                    @foreach (var book in Model.Books)
+                    {
+                        <div class="col-12 col-sm-6 col-md-6 col-lg-4">
+                            <div class="book-card">
+                                <div class="book-card-image">
+                                    <img src="@book.CoverImageUrl" alt="@book.Title" onerror="this.src='https://covers.openlibrary.org/b/id/10527843-M.jpg'" />
+                                    @if (book.AvailableQty > 0)
+                                    {
+                                        <span class="book-card-badge badge-instock">Còn Sách (@book.AvailableQty)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="book-card-badge badge-outstock">Hết Sách</span>
+                                    }
+                                </div>
+                                <div class="book-card-body">
+                                    <span class="book-card-category">@book.Category?.Name</span>
+                                    <h4 class="book-card-title">
+                                        <a asp-action="Details" asp-route-id="@book.BookId">@book.Title</a>
+                                    </h4>
+                                    <p class="book-card-author">Bởi @book.Author</p>
+                                    
+                                    <div class="book-rating mt-auto">
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star-half-stroke"></i>
+                                        <span class="text-muted ms-1 fs-7">(@book.ViewCount xem)</span>
+                                    </div>
+                                </div>
+                                <div class="book-card-footer">
+                                    <span class="text-dark fw-bold" style="font-size: 0.9rem;">Năm XB: @book.PublishedYear</span>
+                                    <a asp-action="Details" asp-route-id="@book.BookId" class="btn btn-sm btn-teal py-1 px-3" style="border-radius: 20px;">
+                                        Chi Tiết
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Custom Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous button -->
+                            <li class="page-item @(Model.PageIndex <= 1 ? "disabled" : "")">
+                                <a class="page-link shadow-sm border border-secondary border-opacity-25" href="@Url.Action("Index", new { pageIndex = Model.PageIndex - 1, searchQuery = Model.SearchQuery, categoryId = Model.SelectedCategoryId, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear, status = Model.SelectedStatus, sortOrder = Model.SortOrder })" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo; Trước</span>
+                                </a>
+                            </li>
+
+                            <!-- Pages list -->
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                                    <a class="page-link shadow-sm border border-secondary border-opacity-25 @(i == Model.PageIndex ? "bg-teal-dk border-teal-dk" : "text-teal-dk")" href="@Url.Action("Index", new { pageIndex = i, searchQuery = Model.SearchQuery, categoryId = Model.SelectedCategoryId, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear, status = Model.SelectedStatus, sortOrder = Model.SortOrder })">@i</a>
+                                </li>
+                            }
+
+                            <!-- Next button -->
+                            <li class="page-item @(Model.PageIndex >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link shadow-sm border border-secondary border-opacity-25" href="@Url.Action("Index", new { pageIndex = Model.PageIndex + 1, searchQuery = Model.SearchQuery, categoryId = Model.SelectedCategoryId, author = Model.SelectedAuthor, publishYear = Model.SelectedPublishYear, status = Model.SelectedStatus, sortOrder = Model.SortOrder })" aria-label="Next">
+                                    <span aria-hidden="true">Sau &raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5 bg-white border border-secondary border-opacity-25 rounded-4 shadow-sm">
+                    <img src="https://img.icons8.com/color/96/000000/empty-box.png" alt="No books" class="mb-3" />
+                    <h3 class="text-muted">Không tìm thấy sách nào</h3>
+                    <p class="text-muted">Bạn vui lòng thử lại với một từ khóa tìm kiếm hoặc bộ lọc khác!</p>
+                    <a asp-action="Index" class="btn btn-teal mt-3">Xóa bộ lọc</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,215 @@
+@model ThuvienCuaHieu.ViewModels.HomeVM
+@{
+    ViewData["Title"] = "Trang Chủ";
+}
+
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container hero-content">
+        <h1 class="display-3 text-white fw-bold mb-2" style="font-family: 'Playfair Display', serif;">Thư Viện Của Hiếu</h1>
+        <p class="slogan">"Nơi tri thức ngự trị"</p>
+        <p class="text-light fs-5 mx-auto mb-4" style="max-width: 600px;">
+            Chào mừng bạn đến với không gian đọc sách hiện đại. Khám phá hàng ngàn đầu sách chọn lọc và bắt đầu hành trình mở rộng tri thức ngay hôm nay!
+        </p>
+        
+        <!-- Search bar -->
+        <form asp-controller="Books" asp-action="Index" method="get" class="hero-search-box shadow">
+            <input type="text" name="searchQuery" class="form-control hero-search-input flex-grow-1" placeholder="Tìm tên sách, tác giả, mã ISBN..." aria-label="Tìm kiếm sách" />
+            <button type="submit" class="btn btn-peach px-4 py-2 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass"></i> <span class="d-none d-sm-inline">Tìm Kiếm</span>
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- Main content container -->
+<div class="container py-5">
+    
+    <!-- Toast Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow border-0 rounded-3 mb-5" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Outstanding Categories Section -->
+    <section class="mb-5">
+        <h2 class="section-title text-center text-teal-dk mb-5">Danh Mục Nổi Bật</h2>
+        <div class="row g-4">
+            @foreach (var category in Model.Categories)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a asp-controller="Books" asp-action="Index" asp-route-categoryId="@category.CategoryId" class="category-card text-decoration-none">
+                        <div class="icon-wrapper">
+                            <i class="fa-solid @category.IconUrl"></i>
+                        </div>
+                        <h3>@category.Name</h3>
+                        <p class="mb-2">@category.Description</p>
+                        <span class="badge bg-light text-dark border border-secondary border-opacity-25 py-1 px-3">
+                            <i class="fa-solid fa-book me-1 text-teal"></i> @category.Books.Count cuốn sách
+                        </span>
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Newest Books Section -->
+    <section class="py-4">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <h2 class="section-title-left text-teal-dk mb-0">Sách Mới Cập Nhật</h2>
+            <a asp-controller="Books" asp-action="Index" class="btn btn-outline-teal d-flex align-items-center gap-2">
+                Xem Tất Cả <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="row g-4">
+            @foreach (var book in Model.NewestBooks)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="book-card">
+                        <div class="book-card-image">
+                            <img src="@book.CoverImageUrl" alt="@book.Title" onerror="this.src='https://covers.openlibrary.org/b/id/10527843-M.jpg'" />
+                            @if (book.AvailableQty > 0)
+                            {
+                                <span class="book-card-badge badge-instock">Còn Sách (@book.AvailableQty)</span>
+                            }
+                            else
+                            {
+                                <span class="book-card-badge badge-outstock">Hết Sách</span>
+                            }
+                        </div>
+                        <div class="book-card-body">
+                            <span class="book-card-category">@book.Category?.Name</span>
+                            <h4 class="book-card-title">
+                                <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookId">@book.Title</a>
+                            </h4>
+                            <p class="book-card-author">Bởi @book.Author</p>
+                            
+                            <div class="book-rating mt-auto">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                                <span class="text-muted ms-1 fs-7">(@book.ViewCount lượt xem)</span>
+                            </div>
+                        </div>
+                        <div class="book-card-footer">
+                            <span class="text-dark fw-bold" style="font-size: 0.9rem;">Năm XB: @book.PublishedYear</span>
+                            <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookId" class="btn btn-sm btn-teal py-1 px-3" style="border-radius: 20px;">
+                                Chi Tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Literary Quote Section -->
+    <section class="px-3">
+        <div class="quote-banner">
+            <div class="px-4">
+                <blockquote>@Model.RandomQuote</blockquote>
+                <cite>— @Model.RandomAuthor —</cite>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Borrowed Books Section -->
+    <section class="py-4">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <h2 class="section-title-left text-teal-dk mb-0">Đọc Nhiều Nhất</h2>
+            <a asp-controller="Books" asp-action="Index" asp-route-sortOrder="popular" class="btn btn-outline-teal d-flex align-items-center gap-2">
+                Xem Bảng Xếp Hạng <i class="fa-solid fa-crown"></i>
+            </a>
+        </div>
+        
+        <div class="row g-4">
+            @foreach (var book in Model.TopBorrowedBooks)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="book-card">
+                        <div class="book-card-image">
+                            <img src="@book.CoverImageUrl" alt="@book.Title" onerror="this.src='https://covers.openlibrary.org/b/id/10527843-M.jpg'" />
+                            @if (book.AvailableQty > 0)
+                            {
+                                <span class="book-card-badge badge-instock">Còn Sách (@book.AvailableQty)</span>
+                            }
+                            else
+                            {
+                                <span class="book-card-badge badge-outstock">Hết Sách</span>
+                            }
+                        </div>
+                        <div class="book-card-body">
+                            <span class="book-card-category">@book.Category?.Name</span>
+                            <h4 class="book-card-title">
+                                <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookId">@book.Title</a>
+                            </h4>
+                            <p class="book-card-author">Bởi @book.Author</p>
+                            
+                            <div class="book-rating mt-auto">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <span class="text-muted ms-1 fs-7">(@book.ViewCount lượt xem)</span>
+                            </div>
+                        </div>
+                        <div class="book-card-footer">
+                            <span class="text-dark fw-bold" style="font-size: 0.9rem;">Năm XB: @book.PublishedYear</span>
+                            <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookId" class="btn btn-sm btn-peach py-1 px-3" style="border-radius: 20px;">
+                                Chi Tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Library Counter Statistics Section -->
+    <section class="py-5 mt-4">
+        <h2 class="section-title text-center text-teal-dk mb-5">Thư Viện Số Liệu</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-card-icon icon-teal">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                    </div>
+                    <div>
+                        <h3 class="display-6 fw-bold mb-0 text-teal-dk" style="font-family: 'Inter', sans-serif;">@Model.TotalBooks.ToString("N0")</h3>
+                        <p class="text-muted mb-0">Đầu sách vật lý</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-card-icon icon-peach">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 class="display-6 fw-bold mb-0 text-teal-dk" style="font-family: 'Inter', sans-serif;">@Model.TotalMembers.ToString("N0")</h3>
+                        <p class="text-muted mb-0">Độc giả đăng ký</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-card-icon icon-mint">
+                        <i class="fa-solid fa-hand-holding-hand"></i>
+                    </div>
+                    <div>
+                        <h3 class="display-6 fw-bold mb-0 text-teal-dk" style="font-family: 'Inter', sans-serif;">@Model.TotalActiveBorrows.ToString("N0")</h3>
+                        <p class="text-muted mb-0">Sách đang cho mượn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+

@@ -1,0 +1,229 @@
+@model ThuvienCuaHieu.ViewModels.AdminVM
+@{
+    ViewData["Title"] = "Bảng Thống Kê Admin";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Cột Trái: Sidebar Menu -->
+        <div class="col-lg-3">
+            <partial name="_AdminSidebar" />
+        </div>
+
+        <!-- Cột Phải: Thống kê & Biểu đồ -->
+        <div class="col-lg-9">
+            
+            <!-- Welcome Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <h2 class="fw-bold text-teal-dk mb-0" style="font-family: 'Playfair Display', serif;">Thống Kê Thư Viện</h2>
+                <span class="text-muted fs-7"><i class="fa-solid fa-clock me-1"></i> Cập nhật lúc: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+
+            <!-- Stats Rows (Thẻ Thống Kê Số Liệu) -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card p-3 shadow-sm border border-secondary border-opacity-10 h-100">
+                        <div class="stat-card-icon icon-teal fs-4" style="width: 45px; height: 45px;">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">ĐẦU SÁCH</span>
+                            <span class="fs-4 fw-bold text-teal-dk">@Model.TotalBooks.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card p-3 shadow-sm border border-secondary border-opacity-10 h-100">
+                        <div class="stat-card-icon icon-peach fs-4" style="width: 45px; height: 45px;">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">ĐỘC GIẢ</span>
+                            <span class="fs-4 fw-bold text-teal-dk">@Model.TotalMembers.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card p-3 shadow-sm border border-secondary border-opacity-10 h-100">
+                        <div class="stat-card-icon icon-mint fs-4" style="width: 45px; height: 45px;">
+                            <i class="fa-solid fa-hand-holding-hand"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">ĐANG MƯỢN</span>
+                            <span class="fs-4 fw-bold text-teal-dk">@Model.TotalActiveBorrows.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card p-3 shadow-sm border border-secondary border-opacity-10 h-100 @(Model.PendingApprovalsCount > 0 ? "bg-warning bg-opacity-10 border-warning border-opacity-25" : "")">
+                        <div class="stat-card-icon fs-4 @(Model.PendingApprovalsCount > 0 ? "bg-warning bg-opacity-20 text-warning-emphasis" : "bg-secondary bg-opacity-10 text-muted")" style="width: 45px; height: 45px;">
+                            <i class="fa-solid fa-hourglass-half"></i>
+                        </div>
+                        <div>
+                            <span class="text-muted d-block" style="font-size: 0.75rem;">CHỜ DUYỆT</span>
+                            <span class="fs-4 fw-bold @(Model.PendingApprovalsCount > 0 ? "text-warning-emphasis" : "text-teal-dk")">@Model.PendingApprovalsCount</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Row (Biểu đồ lượt mượn sách) -->
+            <div class="card border border-secondary border-opacity-10 rounded-4 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 border-bottom border-secondary border-opacity-10">
+                    <h5 class="mb-0 fw-bold text-teal-dk" style="font-family: 'Playfair Display', serif;"><i class="fa-solid fa-chart-line text-peach me-2"></i> Lượt Mượn Sách Theo Tháng</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="borrowChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column lists: Recent Requests & Hot Books -->
+            <div class="row g-4">
+                <!-- Cột trái: Danh sách chờ duyệt gần nhất -->
+                <div class="col-md-7">
+                    <div class="card border border-secondary border-opacity-10 rounded-4 shadow-sm h-100">
+                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold text-teal-dk" style="font-family: 'Playfair Display', serif;"><i class="fa-solid fa-hourglass-half text-warning me-2"></i> Chờ Phê Duyệt Gần Đây</h5>
+                            <a asp-action="Borrows" class="fs-7 text-peach text-decoration-none" style="font-size: 0.8rem;">Xem tất cả</a>
+                        </div>
+                        <div class="card-body p-0">
+                            @if (Model.RecentBorrowRequests.Any(r => r.Status == "Pending"))
+                            {
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <tbody>
+                                            @foreach (var record in Model.RecentBorrowRequests.Where(r => r.Status == "Pending"))
+                                            {
+                                                <tr>
+                                                    <td class="ps-3" style="width: 55px;">
+                                                        <img src="@record.Book?.CoverImageUrl" alt="Cover" class="rounded shadow-sm" style="width: 35px; height: 50px; object-fit: cover;" onerror="this.src='https://covers.openlibrary.org/b/id/10527843-M.jpg'" />
+                                                    </td>
+                                                    <td>
+                                                        <span class="fw-bold text-teal-dk d-block fs-7 text-truncate" style="max-width: 180px; font-size: 0.85rem;">@record.Book?.Title</span>
+                                                        <span class="text-muted d-block" style="font-size: 0.75rem;"><i class="fa-solid fa-user me-1"></i> @record.User?.FullName</span>
+                                                    </td>
+                                                    <td class="text-end pe-3">
+                                                        <form asp-action="ApproveBorrow" asp-route-id="@record.RecordId" method="post" class="d-inline">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-sm btn-teal py-0 px-2 fs-7" title="Duyệt cho mượn"><i class="fa-solid fa-check"></i></button>
+                                                        </form>
+                                                        <form asp-action="RejectBorrow" asp-route-id="@record.RecordId" method="post" class="d-inline ms-1">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2 fs-7" title="Từ chối"><i class="fa-solid fa-xmark"></i></button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-circle-check fs-2 text-success opacity-50 mb-2"></i>
+                                    <p class="mb-0 fs-7">Tuyệt vời! Không có yêu cầu mượn nào đang chờ duyệt.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Top sách được xem nhiều nhất -->
+                <div class="col-md-5">
+                    <div class="card border border-secondary border-opacity-10 rounded-4 shadow-sm h-100">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h5 class="mb-0 fw-bold text-teal-dk" style="font-family: 'Playfair Display', serif;"><i class="fa-solid fa-fire text-danger me-2"></i> Sách Hot Nhất</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                @foreach (var book in Model.TopViewedBooks)
+                                {
+                                    <div class="list-group-item d-flex align-items-center gap-3 py-2 border-bottom-0">
+                                        <img src="@book.CoverImageUrl" alt="Cover" class="rounded shadow-sm border border-secondary border-opacity-10" style="width: 35px; height: 50px; object-fit: cover;" onerror="this.src='https://covers.openlibrary.org/b/id/10527843-M.jpg'" />
+                                        <div class="overflow-hidden flex-grow-1">
+                                            <span class="fw-bold text-teal-dk text-truncate d-block" style="font-size: 0.85rem;">@book.Title</span>
+                                            <span class="text-muted d-block" style="font-size: 0.75rem;">Bởi @book.Author</span>
+                                        </div>
+                                        <span class="badge bg-mint text-teal-dk rounded-pill" style="font-size: 0.75rem;"><i class="fa-solid fa-eye me-1"></i> @book.ViewCount</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            const ctx = document.getElementById('borrowChart').getContext('2d');
+            
+            // Get serialized json arrays from the Model
+            const months = @Html.Raw(Model.ChartMonthsJson);
+            const borrowCounts = @Html.Raw(Model.ChartBorrowCountsJson);
+
+            const borrowChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Lượt mượn sách',
+                        data: borrowCounts,
+                        backgroundColor: 'rgba(78, 143, 163, 0.2)',
+                        borderColor: '#4E8FA3',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#F0A090',
+                        pointBorderColor: '#fff',
+                        pointHoverRadius: 7,
+                        pointRadius: 5,
+                        tension: 0.35,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(45, 95, 112, 0.05)'
+                            },
+                            ticks: {
+                                color: '#3d6675',
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#3d6675',
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

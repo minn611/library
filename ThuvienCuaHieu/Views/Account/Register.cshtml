@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Đăng Ký Độc Giả";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center py-4">
+        <div class="col-md-6 col-lg-5">
+            <div class="form-card text-center shadow-lg border border-secondary border-opacity-10 bg-white">
+                <i class="fa-solid fa-user-plus text-peach fs-1 mb-3"></i>
+                <h2 class="display-6 fw-bold text-teal-dk mb-2" style="font-family: 'Playfair Display', serif;">Đăng Ký Độc Giả</h2>
+                <p class="text-muted mb-4">Đăng ký tài khoản để mượn sách vật lý miễn phí từ thư viện của Hiếu.</p>
+                
+                <!-- Display validation summary errors -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger rounded-3 border-0 p-3 mb-4 text-start" style="font-size: 0.9rem;" role="alert">
+                        <i class="fa-solid fa-circle-xmark me-2"></i> <strong>Đã xảy ra lỗi:</strong>
+                        <div asp-validation-summary="All" class="mt-2 text-danger"></div>
+                    </div>
+                }
+
+                <form asp-action="Register" method="post" class="text-start">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="fullName" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Họ Và Tên <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;"><i class="fa-regular fa-user text-muted"></i></span>
+                            <input type="text" name="fullName" id="fullName" class="form-control form-control-custom border-start-0" placeholder="Nguyễn Văn A" required style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Địa Chỉ Email <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;"><i class="fa-regular fa-envelope text-muted"></i></span>
+                            <input type="email" name="email" id="email" class="form-control form-control-custom border-start-0" placeholder="user@thuvien.com" required style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Số Điện Thoại</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;"><i class="fa-solid fa-phone text-muted"></i></span>
+                            <input type="tel" name="phone" id="phone" class="form-control form-control-custom border-start-0" placeholder="0987654321" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Mật Khẩu <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;"><i class="fa-solid fa-lock text-muted"></i></span>
+                            <input type="password" name="password" id="password" class="form-control form-control-custom border-start-0" placeholder="••••••••" required style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-peach py-3 fs-6 w-100">
+                            <i class="fa-solid fa-user-plus me-1"></i> Tạo Tài Khoản Mới
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-4 border-top pt-4 text-center">
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                        Đã có tài khoản độc giả? 
+                        <a asp-action="Login" class="text-teal-dk fw-bold text-decoration-none ms-1">Đăng Nhập</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

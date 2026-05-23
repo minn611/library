@@ -1,0 +1,103 @@
+@model IEnumerable<ThuvienCuaHieu.Models.Book>
+@{
+    ViewData["Title"] = "Quản Lý Sách";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Cột Trái: Sidebar Menu -->
+        <div class="col-lg-3">
+            <partial name="_AdminSidebar" />
+        </div>
+
+        <!-- Cột Phải: Bảng CRUD Sách -->
+        <div class="col-lg-9">
+            
+            <!-- Success/Error alerts -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Header Panel -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 pb-2 border-bottom">
+                <div>
+                    <h2 class="fw-bold text-teal-dk mb-1" style="font-family: 'Playfair Display', serif;">Quản Lý Kho Sách</h2>
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">Thêm mới, sửa đổi thông tin hoặc xóa bớt đầu sách.</p>
+                </div>
+                <a asp-action="CreateBook" class="btn btn-peach d-flex align-items-center gap-2" style="border-radius: 20px;">
+                    <i class="fa-solid fa-plus"></i> Thêm Sách Mới
+                </a>
+            </div>
+
+            <!-- Books Table -->
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle table-custom">
+                        <thead>
+                            <tr>
+                                <th>Ảnh Bìa</th>
+                                <th>Tiêu Đề & Tác Giả</th>
+                                <th>Thể Loại</th>
+                                <th>Mã ISBN</th>
+                                <th class="text-center">Số Lượng</th>
+                                <th class="text-center" style="width: 120px;">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var book in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@book.CoverImageUrl" alt="Cover" class="rounded shadow-sm" style="width: 45px; height: 65px; object-fit: cover;" onerror="this.src='https://covers.openlibrary.org/b/id/10527843-M.jpg'" />
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-teal-dk d-block">@book.Title</span>
+                                        <span class="text-muted d-block" style="font-size: 0.8rem;">Bởi tác giả: @book.Author</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-mint text-teal-dk px-2 py-1 rounded" style="font-size: 0.8rem;">@book.Category?.Name</span>
+                                    </td>
+                                    <td class="text-muted fs-7 font-monospace">@book.ISBN</td>
+                                    <td class="text-center">
+                                        <span class="fw-bold @(book.AvailableQty > 0 ? "text-success" : "text-danger")">@book.AvailableQty</span>
+                                        <span class="text-muted"> / @book.TotalQty</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a asp-action="EditBook" asp-route-id="@book.BookId" class="btn btn-sm btn-outline-teal py-1 px-2" title="Chỉnh sửa">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                            
+                                            <!-- Delete form button -->
+                                            <form asp-action="DeleteBook" asp-route-id="@book.BookId" method="post" class="mb-0 d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa cuốn sách này khỏi kho thư viện không?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2" title="Xóa sách">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 bg-white border border-secondary border-opacity-10 rounded-4 shadow-sm">
+                    <img src="https://img.icons8.com/color/96/000000/empty-box.png" alt="Empty list" class="mb-3" />
+                    <h4 class="text-muted">Danh sách sách trống</h4>
+                    <p class="text-muted">Hãy thêm cuốn sách đầu tiên của thư viện!</p>
+                    <a asp-action="CreateBook" class="btn btn-peach mt-3">Thêm Sách Mới</a>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

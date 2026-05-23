@@ -1,0 +1,72 @@
+@{
+    ViewData["Title"] = "Đăng Nhập Độc Giả";
+    var returnUrl = ViewBag.ReturnUrl as string;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center py-4">
+        <div class="col-md-6 col-lg-5">
+            
+            <!-- Alert success if registered successfully -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow border-0 rounded-3 mb-4" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="form-card text-center shadow-lg border border-secondary border-opacity-10 bg-white">
+                <i class="fa-solid fa-book-open text-peach fs-1 mb-3" style="transform: rotate(-10deg);"></i>
+                <h2 class="display-6 fw-bold text-teal-dk mb-2" style="font-family: 'Playfair Display', serif;">Chào Mừng Trở Lại</h2>
+                <p class="text-muted mb-4">Hãy đăng nhập tài khoản độc giả của bạn để bắt đầu mượn sách.</p>
+                
+                <!-- Display validation summary errors -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger rounded-3 border-0 p-3 mb-4 text-start" style="font-size: 0.9rem;" role="alert">
+                        <i class="fa-solid fa-circle-xmark me-2"></i> <strong>Đã xảy ra lỗi:</strong>
+                        <div asp-validation-summary="All" class="mt-2 text-danger"></div>
+                    </div>
+                }
+
+                <form asp-action="Login" method="post" class="text-start">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Địa Chỉ Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;"><i class="fa-regular fa-envelope text-muted"></i></span>
+                            <input type="email" name="email" id="email" class="form-control form-control-custom border-start-0" placeholder="user@thuvien.com" required style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between">
+                            <label for="password" class="form-label fw-bold text-muted" style="font-size: 0.85rem;">Mật Khẩu</label>
+                            <a href="#" class="text-peach text-decoration-none fs-7" style="font-size: 0.8rem;">Quên mật khẩu?</a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;"><i class="fa-solid fa-lock text-muted"></i></span>
+                            <input type="password" name="password" id="password" class="form-control form-control-custom border-start-0" placeholder="••••••••" required style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-teal py-3 fs-6 w-100">
+                            <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng Nhập Hệ Thống
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-4 border-top pt-4 text-center">
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                        Chưa có tài khoản độc giả? 
+                        <a asp-action="Register" class="text-peach fw-bold text-decoration-none ms-1">Đăng Ký Ngay</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

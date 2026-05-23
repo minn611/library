@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Thư Viện Của Hiếu</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Custom site CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ThuvienCuaHieu.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+            <div class="container">
+                <a class="navbar-brand text-decoration-none" asp-controller="Home" asp-action="Index">
+                    <i class="fa-solid fa-book-open"></i> Thư Viện Của Hiếu
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">
+                                <i class="fa-solid fa-house me-1"></i> Trang Chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Books" ? "active" : "")" asp-controller="Books" asp-action="Index">
+                                <i class="fa-solid fa-book me-1"></i> Thư Viện
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav align-items-center">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            var userRole = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+                            var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? User.Identity.Name;
+                            var avatar = User.Claims.FirstOrDefault(c => c.Type == "Avatar")?.Value ?? "/img/default-avatar.png";
+
+                            @if (userRole == "Admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link me-2 text-warning fw-bold" asp-controller="Admin" asp-action="Index">
+                                        <i class="fa-solid fa-gauge-high me-1"></i> Quản Trị Admin
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="@avatar" alt="Avatar" class="rounded-circle border border-2 border-light" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=80'" />
+                                    <span>@fullName</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border border-2" style="border-color: var(--c-mint) !important; background-color: white;" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile">
+                                            <i class="fa-solid fa-user-circle text-muted me-2"></i> Hồ Sơ Cá Nhân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile" asp-fragment="borrow-history">
+                                            <i class="fa-solid fa-clock-rotate-left text-muted me-2"></i> Lịch Sử Mượn Sách
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Account" asp-action="Profile" asp-fragment="wishlist">
+                                            <i class="fa-solid fa-heart text-danger me-2"></i> Sách Yêu Thích
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item py-2 text-danger" asp-controller="Account" asp-action="Logout">
+                                            <i class="fa-solid fa-right-from-bracket me-2"></i> Đăng Xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item me-2">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">
+                                    <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng Nhập
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link nav-btn-cta py-2 px-4 shadow-sm" asp-controller="Account" asp-action="Register">
+                                    <i class="fa-solid fa-user-plus me-1"></i> Đăng Ký
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-md-5">
+                    <h4 class="text-white mb-3" style="font-family: 'Playfair Display', serif;">Thư Viện Của Hiếu</h4>
+                    <p class="text-mint fs-5 mb-3" style="font-style: italic; color: var(--c-peach);">"Nơi tri thức ngự trị"</p>
+                    <p class="text-light" style="max-width: 400px; font-size: 0.9rem;">
+                        Nơi cung cấp hàng ngàn đầu sách phong phú từ khoa học, công nghệ, lịch sử đến kỹ năng sống và văn học nghệ thuật. Hãy cùng Hiếu kiến tạo tương lai từ những trang sách vàng!
+                    </p>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="text-white mb-3" style="font-family: 'Inter', sans-serif; font-weight: 600;">Danh Mục Nhanh</h5>
+                    <ul class="list-unstyled" style="font-size: 0.9rem;">
+                        <li class="mb-2"><a asp-controller="Home" asp-action="Index"><i class="fa-solid fa-chevron-right me-2 fs-7"></i>Trang Chủ</a></li>
+                        <li class="mb-2"><a asp-controller="Books" asp-action="Index"><i class="fa-solid fa-chevron-right me-2 fs-7"></i>Khám Phá Thư Viện</a></li>
+                        <li class="mb-2"><a asp-controller="Account" asp-action="Login"><i class="fa-solid fa-chevron-right me-2 fs-7"></i>Đăng Nhập</a></li>
+                        <li class="mb-2"><a asp-controller="Account" asp-action="Register"><i class="fa-solid fa-chevron-right me-2 fs-7"></i>Đăng Ký Độc Giả</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="text-white mb-3" style="font-family: 'Inter', sans-serif; font-weight: 600;">Thông Tin Liên Hệ</h5>
+                    <ul class="list-unstyled text-light" style="font-size: 0.9rem;">
+                        <li class="mb-3 d-flex align-items-start gap-2">
+                            <i class="fa-solid fa-location-dot mt-1 text-peach" style="color: var(--c-peach);"></i>
+                            <span>Từ Sơn, Bắc Ninh</span>
+                        </li>
+                        <li class="mb-2 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-phone text-peach" style="color: var(--c-peach);"></i>
+                            <span>0868870869</span>
+                        </li>
+                        <li class="mb-2 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-envelope text-peach" style="color: var(--c-peach);"></i>
+                            <span>minn0611n@gmail.com</span>
+                        </li>
+                    </ul>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="fs-4 text-mint"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" class="fs-4 text-mint"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="fs-4 text-mint"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" class="fs-4 text-mint"><i class="fa-brands fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

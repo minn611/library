@@ -1,0 +1,127 @@
+@model IEnumerable<ThuvienCuaHieu.Models.User>
+@{
+    ViewData["Title"] = "Quản Lý Độc Giả";
+}
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Cột Trái: Sidebar Menu -->
+        <div class="col-lg-3">
+            <partial name="_AdminSidebar" />
+        </div>
+
+        <!-- Cột Phải: Bảng Quản Lý Thành Viên -->
+        <div class="col-lg-9">
+            
+            <!-- Success/Error alerts -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i> @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4" role="alert">
+                    <i class="fa-solid fa-circle-xmark me-2"></i> @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Header Panel -->
+            <div class="mb-4 pb-2 border-bottom">
+                <h2 class="fw-bold text-teal-dk mb-1" style="font-family: 'Playfair Display', serif;">Quản Lý Thành Viên Độc Giả</h2>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">Xem danh sách độc giả đăng ký tài khoản và khóa/mở khóa quyền mượn sách.</p>
+            </div>
+
+            <!-- Users Table -->
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle table-custom">
+                        <thead>
+                            <tr>
+                                <th>Avatar</th>
+                                <th>Họ Và Tên</th>
+                                <th>Email</th>
+                                <th>Điện Thoại</th>
+                                <th>Vai Trò</th>
+                                <th>Ngày Tham Gia</th>
+                                <th>Trạng Thái</th>
+                                <th class="text-center" style="width: 140px;">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <img src="@(user.Avatar ?? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=80")" alt="Avatar" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=80'" />
+                                    </td>
+                                    <td class="fw-bold text-teal-dk">@user.FullName</td>
+                                    <td class="text-muted" style="font-size: 0.9rem;">@user.Email</td>
+                                    <td class="text-muted" style="font-size: 0.9rem;">@(string.IsNullOrEmpty(user.Phone) ? "—" : user.Phone)</td>
+                                    <td>
+                                        @if (user.Role == "Admin")
+                                        {
+                                            <span class="badge bg-warning bg-opacity-25 text-warning-emphasis py-1 px-2" style="font-size: 0.8rem;">Administrator</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark py-1 px-2 border" style="font-size: 0.8rem;">Độc Giả</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted" style="font-size: 0.85rem;">@user.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success bg-opacity-25 text-success-emphasis py-1 px-3" style="border-radius: 20px;">Hoạt Động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger bg-opacity-25 text-danger-emphasis py-1 px-3" style="border-radius: 20px;">Đã Khóa</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <!-- Prevent toggle of other admins for simplicity in small apps, or at least self-lock -->
+                                        @if (User.Identity != null && user.Email == User.Identity.Name)
+                                        {
+                                            <span class="text-muted fs-7">Tài khoản hiện tại</span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="ToggleUserStatus" asp-route-id="@user.UserId" method="post" class="mb-0 d-grid">
+                                                @Html.AntiForgeryToken()
+                                                @if (user.IsActive)
+                                                {
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger py-1 px-2 fs-7" style="border-radius: 20px;">
+                                                        <i class="fa-solid fa-lock me-1"></i> Khóa Tài Khoản
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit" class="btn btn-sm btn-teal py-1 px-2 fs-7" style="border-radius: 20px;">
+                                                        <i class="fa-solid fa-lock-open me-1"></i> Mở Khóa
+                                                    </button>
+                                                }
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 bg-white border border-secondary border-opacity-10 rounded-4 shadow-sm">
+                    <i class="fa-solid fa-users fs-1 text-muted opacity-50 mb-3"></i>
+                    <h4 class="text-muted">Chưa có độc giả nào</h4>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
