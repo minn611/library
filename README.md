@@ -107,21 +107,4 @@ ThuvienCuaHieu/
     ├── js/
     └── uploads/covers/
 ```
-## 6. Kế Hoạch Thực Hiện
-
-| Giai đoạn | Nội dung | Tuần |
-|---|---|---|
-| **Khởi tạo** | Tạo project, cài EF Core, thiết kế DB, migration | 1 |
-| **Nền tảng** | Models, DbContext, SeedData + 20 cuốn sách mẫu | 2 |
-| **Sách** | CRUD sách (admin), hiển thị danh sách, chi tiết | 3 |
-| **Xác thực** | Đăng ký, đăng nhập, phân quyền Admin/User | 4 |
-| **Tìm kiếm** | Thanh tìm kiếm, bộ lọc thể loại, phân trang | 5 |
-| **Mượn/Trả** | Luồng mượn, duyệt, trả, tính phạt trễ hạn | 6 |
-| **Cá nhân hóa** | Wishlist, lịch sử, đánh giá, thông báo | 7 |
-| **Admin** | Dashboard, biểu đồ Chart.js, báo cáo | 8 |
-| **Giao diện** | Áp dụng bảng màu teal, responsive Bootstrap 5 | 9 |
-| **Tổng kết** | Kiểm thử, fix bug, viết báo cáo | 10 |
-
----
-
 > 🎨 **Tông màu teal + hồng đào** tạo cảm giác biển — yên bình, học thuật nhưng không khô khan. Đúng tinh thần *"Nơi tri thức ngự trị"*!
